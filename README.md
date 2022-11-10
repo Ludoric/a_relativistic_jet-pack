@@ -6,19 +6,19 @@ To reduce motion sickness the super-flux-quantum-thingummy™ jet-pack is equipp
 Alternatively, you float serenely though a rather curious universe where the speed of light has been lowered to 20ms-1, with an instantaneous rest frame acceleration of 4ms-2.
 When not pressing a direction key, you decelerate at -1ms-2.
 
-
-# Key Bindings
-[W]          - accelerate camera forwards
-[S]          - accelerate camera backwards
-[A]          - accelerate camera left
-[D]          - accelerate camera right
-[space]      - accelerate camera up
-[left_shift] - accelerate camera down
-[E]          - don't null camera velocity
-[F12]        - make full screen
-[escape]     - exit full screen
-[ctrl]+[W]   - close application
-[ctrl]+[Q]   - close application
+| Key Binding  | Action                         |
+| ------------ | ------------------------------ |
+| [W]          | accelerate camera forwards     |
+| [S]          | accelerate camera backwards    |
+| [A]          | accelerate camera left         |
+| [D]          | accelerate camera right        |
+| [space]      | accelerate camera up           |
+| [left_shift] | accelerate camera down         |
+| [E]          | don't null camera velocity     |
+| [F12]        | make full screen               |
+| [escape]     | exit full screen               |
+| [ctrl]+[W]   | close application              |
+| [ctrl]+[Q]   | close application              | 
 
 
 # Manifest
