@@ -1,9 +1,9 @@
 ## A Relativistic Jet-Pack
-You have strapped yourself into a super-flux-quantum-thingummy™ jet-pack, capable of accelerations of a ludicrous 4 million g without pulverising it's occupant. As you hurtle through space, you are grateful that your super-flux-quantum-thingummy™ jet-pack also places you in ultra-electro-magnetic-phase-space™, and thus incapable of colliding with the rather lackluster polygons occupying this corner of the universe, otherwise polygons would quickly gain the appearance of Swiss Cheese, with super-flux-quantum-thingummy™ jet-pack shaped holes.
-To reduce motion sickness the super-flux-quantum-thingummy™ jet-pack is equipped with a inertial damping, and will start to reduce your velocity as soon as you stop accelerating.
+You have strapped yourself into a super-flux-quantum-thingummy™ jet-pack, capable of accelerations of a ludicrous 4 million g without pulverising it's occupant. As you hurtle through space, you are grateful that your super-flux-quantum-thingummy™ jet-pack also places you in ultra-electro-magnetic-phase-space™, and thus incapable of colliding with the rather lackluster polygons occupying this corner of the universe, otherwise polygons would quickly gain the appearance of Swiss cheese with super-flux-quantum-thingummy™ jet-pack shaped holes.
+To reduce motion sickness the super-flux-quantum-thingummy™ jet-pack is equipped with inertial damping, and will start to reduce your velocity as soon as you stop accelerating.
 
 
-Alternatively, you float serenely though a rather curious universe where the speed of light has been lowered to 32ms-1, with an instantaneous rest frame acceleration of 4ms-2.
+Alternatively, you float serenely though a rather curious universe where the speed of light has been lowered to 20ms-1, with an instantaneous rest frame acceleration of 4ms-2.
 When not pressing a direction key, you decelerate at -1ms-2.
 
 
@@ -25,6 +25,8 @@ When not pressing a direction key, you decelerate at -1ms-2.
 This code shows a view of a world when travelling at relativistic speed.
 This is done by ray tracing signed distance functions (SDFs), generalised to 4-space.
 Details of SDFs can be found on [Inigo Quilez's Website](https://iquilezles.org/articles/).
+
+This project was started after noting that the visual aids used in lectures on special relativity were either static images or terribly pixelated. I have not looked, but there are likely better inplementations of special relativity in demos around the internet, but if I tried to do things that no one had done before I would never get started.
 
 Requires GLFW 3.3.6 (or greater) dynamically linked libraries (not included), and a graphics device that supports OpenGL 4.3 or higher. (This will include most graphics cards made after 2017).
 GLFW3 is available from your favourite Linux package manager, and Windows and macOS binaries are available from the [GLFW website](https://www.glfw.org/download.html).
