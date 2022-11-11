@@ -25,14 +25,14 @@ enum Camera_Movement {
     WORLDDOWN
 };
 // maximum speed
-const float C = 20.0f; 
+const float C = 10.0f; 
 
 // Default camera values
 const float YAW           =  90.0f;
 const float PITCH         =   0.0f;
 // const float SPEED         =  2.5f;
-const float ACCELLERATION =   4.0f;
-const float DRAG          =   1.0f;
+const float ACCELLERATION =   2.0f;
+const float DRAG          =   2.0f;
 const float SENSITIVITY   =   0.1f;
 const float ZOOM          =  45.0f;
 
@@ -55,7 +55,7 @@ public:
     float Pitch;
     // camera options
     float MovementAccelleration;
-    float MovementDrag; // both of these are the rest frame forces * rest frame masses
+    float MovementDrag; // both of these are the rest frame forces / rest frame masses
     float MovementC;
     // float MovementSpeed;
     float MouseSensitivity;
@@ -91,14 +91,16 @@ public:
     // Note that the time axis is the the LAST slot, and that g has signature ---+ 
     glm::mat4 GetLorentzBoost()
     {
-        const glm::vec3 v = Velocity;
+        glm::vec3 v = Velocity;  // maybe we want the opposite transfrom?
         float v2 = glm::dot(v, v);
         float g = glm::inversesqrt(1.0f - v2/glm::dot(MovementC, MovementC));
-        float gm1 = g - 1.0f;
+        float gm1ov2 = (g - 1.0f)/v2;
+        if (glm::isnan(gm1ov2))
+            gm1ov2 = 0;
         // constructed column major
-        return glm::mat4(glm::vec4(1.0f + gm1*v.x*v.x/v2, gm1*v.x*v.y/v2, gm1*v.x*v.z/v2, -g*v.x/MovementC),
-                         glm::vec4(gm1*v.y*v.x/v2, gm1*v.y*v.y/v2, gm1*v.y*v.z/v2, -g*v.y/MovementC),
-                         glm::vec4(gm1*v.z*v.x/v2, gm1*v.z*v.y/v2, gm1*v.z*v.z/v2, -g*v.z/MovementC),
+        return glm::mat4(glm::vec4(1.0f + gm1ov2*v.x*v.x, gm1ov2*v.x*v.y, gm1ov2*v.x*v.z, -g*v.x/MovementC),
+                         glm::vec4(gm1ov2*v.y*v.x, 1.0f + gm1ov2*v.y*v.y, gm1ov2*v.y*v.z, -g*v.y/MovementC),
+                         glm::vec4(gm1ov2*v.z*v.x, gm1ov2*v.z*v.y, 1.0f + gm1ov2*v.z*v.z, -g*v.z/MovementC),
                          glm::vec4(-g*v.x/MovementC, -g*v.y/MovementC, -g*v.z/MovementC, g));
     }
 

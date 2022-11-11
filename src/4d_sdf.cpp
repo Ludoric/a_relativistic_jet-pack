@@ -179,13 +179,14 @@ int main(){
     glUseProgram(compute_program);
     glBindImageTexture( 0, tex_pattern[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F );
     GLuint timeloc = glGetUniformLocation(compute_program, "time"); // the world's time
-    GLuint tauloc = glGetUniformLocation(compute_program, "tau"); // the camera's time
+    // GLuint tauloc = glGetUniformLocation(compute_program, "tau"); // the camera's time
     GLuint viewloc = glGetUniformLocation(compute_program, "view");
     GLuint boostloc = glGetUniformLocation(compute_program, "B");
+    GLuint velloc = glGetUniformLocation(compute_program, "vel");
     GLuint imsizeloc = glGetUniformLocation(compute_program, "imsize");
 
     
-    cam = Camera();
+    cam = Camera(glm::vec3(0.0f, -1.0f, 0.0f));
 
     double print_timecounter = glfwGetTime();
     double last_print_Time = print_timecounter;
@@ -215,9 +216,10 @@ int main(){
         lorentz_boost = cam.GetLorentzBoost();
 
         glUseProgram(compute_program); // gl shader commands refer to the compute shader
-        glUniform1f(tauloc, float(currentTime)); 
+        // glUniform1f(tauloc, float(currentTime)); 
         glUniform1f(timeloc, float(worldFrameTime)); 
         glUniform2f(imsizeloc, float(imgWidth), float(imgHeight)); 
+        glUniform4fv(velloc, 1, glm::value_ptr(glm::vec4(cam.Velocity, cam.MovementC))); // send matrix to shader
         glUniformMatrix4fv(viewloc, 1, GL_FALSE, glm::value_ptr(inverse_view)); // send matrix to shader
         glUniformMatrix4fv(boostloc, 1, GL_FALSE, glm::value_ptr(lorentz_boost)); // send matrix to shader
         glDispatchCompute(imgWidth, imgHeight, 1);

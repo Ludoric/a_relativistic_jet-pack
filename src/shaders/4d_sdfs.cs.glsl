@@ -4,17 +4,25 @@ layout(rgba32f, binding = 0) restrict writeonly uniform image2D img;
 // layout(rgba32f, binding = 1) uniform image2D img_output;
 
 // layout(binding=0) uniform sampler2D img_input;
-uniform mat4 view; 
+uniform mat4 view;
 uniform mat4 B;  // Lorentz boost matrix from the camera's frame
 uniform vec2 imsize;
-uniform float tau; // camera time 
+uniform vec4 vel;
+// uniform float tau; // camera time 
 uniform float time; // world time
 
 float sdf(in vec3 pin){
     vec3 p = mod(pin+vec3(1.0), vec3(2.0))-vec3(1.0);
-    vec2 torus_dim = vec2(0.5, 0.25);
-    vec2 q = vec2(length(p.xz)-torus_dim.x,p.y);
-    return length(q)-torus_dim.y;
+    // if (pin.x > 0.0){
+    // const vec2 torus_dim = vec2(0.5, 0.25);
+    // vec2 q = vec2(length(p.xz)-torus_dim.x,p.y);
+    // return length(q)-torus_dim.y;
+    // }
+
+    const vec3 b = vec3(0.5,0.5,0.5);
+    vec3 q = abs(p) - b;
+    return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+    
 }
 
 
@@ -40,22 +48,24 @@ void main() {
     vec2 pixel_coords = vec2(gid/int(imsize.y), gid%int(imsize.y));
     // add check for end of array
     
-    // // camera movement	
-	// float an = 1.0 + 0.1*time;
-	// vec3 ro = vec3( 1.5*cos(an), 0.4, 1.5*sin(an) );
-    // vec3 ta = vec3( 0.0, 0.0, 0.0 );
-    // // camera matrix
-    // vec3 ww = normalize( ta - ro );
-    // vec3 uu = normalize( cross(ww,vec3(0.0,1.0,0.0) ) );
-    // vec3 vv = normalize( cross(uu,ww));
-
     vec2 p = (-imsize.xy + 2.0*pixel_coords)/imsize.y;
 
     // create view ray
     // vec3 rd = normalize( p.x*uu + p.y*vv + 1.5*ww );
     vec3 ro = view[3].xyz;
-    vec3 rd = (view*vec4(p, -1.5, 0)).xyz;
+    vec3 rd = mat3(view)*vec3(p, -1.5); // mat3() will take the top lefthand corner
+
+    // we will have to move the world, and keep the camera still
+    // Work out how to calculate the correction new direction
+    vec4 kprime = B*vec4(rd, 1.0); // 1.0rad s-1 / c ???
+
+    // shift the world to make it look like the rays are moving
+    rd = normalize(kprime.xyz + B[3].xyz);
     
+    // kprime.w will give the change in colour frequency.
+    // Use a small 3d texture (generated in code?) to do the conversion from velocity shifted color to rgb
+    // CIE 1931 colour space
+    // GET YOUR COLOURS HERE!!! https://www.fourmilab.ch/documents/specrend/
 
 
    // raymarch
@@ -66,7 +76,7 @@ void main() {
        vec3 pos = ro + t*rd;
        float h = sdf(pos);
        if( abs(h)<0.0001 || t>tmax ) break;
-       t += h*0.75;
+       t += h*0.95;
    }
    
    
@@ -84,6 +94,7 @@ void main() {
     // col = t>=10 ? vec3(0.0) : vec3(1.0);
     imageStore(img, ivec2(pixel_coords), vec4(sqrt(col), 1.0));
 }
+
 
 
 
