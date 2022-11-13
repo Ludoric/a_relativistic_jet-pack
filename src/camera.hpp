@@ -25,7 +25,7 @@ enum Camera_Movement {
     WORLDDOWN
 };
 // maximum speed
-const float C = 10.0f; 
+const float C = 20.0f; 
 
 // Default camera values
 const float YAW           =  90.0f;
@@ -170,7 +170,7 @@ public:
         {
             glm::vec3 acc = (forceOm - glm::dot(forceOm, Velocity)*Velocity/glm::dot(MovementC, MovementC))*oneOverg;
             Velocity += acc * deltaTime;
-        } else if (glm::dot(Velocity, Velocity) <= 0.0000001f)
+        } else if ((glm::dot(Velocity, Velocity) <= 0.0000001f) || glm::isnan(glm::dot(Velocity, Velocity))  )
                 Velocity = glm::vec3(0.0f, 0.0f, 0.0f);
         // std::cout << "v = " << glm::to_string(Velocity) << std::endl;
         

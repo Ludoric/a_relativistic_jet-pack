@@ -1,4 +1,3 @@
-// g++ -I./include src/4d_sdf.cpp src/shader_utils.cpp src/glad.c -lglfw -o 4d_sdf ; ./4d_sdf
 #include "shader_utils.hpp"
 #include "camera.hpp"
 #include <cstdlib>
@@ -6,13 +5,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/norm.hpp>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 
 // Wouldn't it be nice to specify the gpu used?
-
-// total number of particles to use in the simulation
-// must be powers of 2 (I think?)
-
-// This one is important, and will effect the accuracy and speed of the simulation
 
 
 #define RANF(min, max) ((float)(std::rand())/RAND_MAX)*(max-min)+min
@@ -30,7 +30,6 @@ void processInput(GLFWwindow *window);
 double mouse_y_prev = 0, mouse_x_prev = 0;
 GLuint imgWidth = 800, imgHeight = 800;
 Camera cam;
-// int screen_resized = 0;
 
 
 struct Window_info{int width, height, xpos, ypos; } window_info = {0, 0, 0, 0};
@@ -126,7 +125,8 @@ int main(){
 
     //========================================================================
     // setup the data structures to pass to the compute shader and render shader
-    
+
+
 
      // texture handle and dimensions
     GLuint tex_pattern [] = {0};
@@ -162,6 +162,30 @@ int main(){
     quad_vao = vao;
     }
 
+    // lambda2RGB texture
+
+    GLuint tex_lambda2RGB;
+    {
+        glGenTextures(1, &tex_lambda2RGB);
+        // glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, tex_lambda2RGB);
+        // linear allows us to scale the window up retaining reasonable quality
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        // same internal format as compute shader input
+
+        // create the inital texture!!!!
+        int width, height, nrChannels;
+        unsigned char *data = stbi_load("src/lambda2RGB.png", &width, &height, &nrChannels, 0);
+        if (data)
+            glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        else
+            std::cout << "FAILED TO LOAD IMAGE!!!" << std::endl;
+        stbi_image_free(data);
+    }
     //========================================================================
 
     // now just setup and run the loop
@@ -173,17 +197,25 @@ int main(){
     // glClear(GL_COLOR_BUFFER_BIT);
     glm::mat4 inverse_view;
     glm::mat4 lorentz_boost;
+    
 
-    glBindImageTexture( 0, tex_pattern[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F );
     
     glUseProgram(compute_program);
-    glBindImageTexture( 0, tex_pattern[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F );
+    // glActiveTexture(GL_TEXTURE1);
+    // glBindTexture(GL_TEXTURE_2D, tex_lambda2RGB);
+    glUniform1i(glGetUniformLocation(compute_program, "lambda2RGB"), 1);
     GLuint timeloc = glGetUniformLocation(compute_program, "time"); // the world's time
     // GLuint tauloc = glGetUniformLocation(compute_program, "tau"); // the camera's time
     GLuint viewloc = glGetUniformLocation(compute_program, "view");
     GLuint boostloc = glGetUniformLocation(compute_program, "B");
-    GLuint velloc = glGetUniformLocation(compute_program, "vel");
+    // GLuint velloc = glGetUniformLocation(compute_program, "vel");
     GLuint imsizeloc = glGetUniformLocation(compute_program, "imsize");
+    
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, tex_pattern[0]);
+    glBindImageTexture( 0, tex_pattern[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F );
+    glUseProgram(display_program);
+    // glBindImageTexture( 0, tex_pattern[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F );
 
     
     cam = Camera(glm::vec3(0.0f, -1.0f, 0.0f));
@@ -205,7 +237,8 @@ int main(){
         if(currentTime >= print_timecounter){
             std::cout << numFrames << "fps  =  "
                 << (currentTime-last_print_Time)*1000.0/((double)numFrames)
-                << "mspf"  << std::endl;
+                << "mspf\tBeta = "
+                << glm::l2Norm(cam.Velocity)/cam.MovementC << std::endl;
             numFrames = 0;
             last_print_Time = currentTime;
             print_timecounter += 1.0;
@@ -219,9 +252,13 @@ int main(){
         // glUniform1f(tauloc, float(currentTime)); 
         glUniform1f(timeloc, float(worldFrameTime)); 
         glUniform2f(imsizeloc, float(imgWidth), float(imgHeight)); 
-        glUniform4fv(velloc, 1, glm::value_ptr(glm::vec4(cam.Velocity, cam.MovementC))); // send matrix to shader
+        // glUniform4fv(velloc, 1, glm::value_ptr(glm::vec4(cam.Velocity, cam.MovementC))); // send matrix to shader
         glUniformMatrix4fv(viewloc, 1, GL_FALSE, glm::value_ptr(inverse_view)); // send matrix to shader
         glUniformMatrix4fv(boostloc, 1, GL_FALSE, glm::value_ptr(lorentz_boost)); // send matrix to shader
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, tex_pattern[0]);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, tex_lambda2RGB);
         glDispatchCompute(imgWidth, imgHeight, 1);
 
         // update paricle positions
@@ -338,7 +375,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         glfwSetWindowShouldClose(window, GL_TRUE);
     }else if (action == GLFW_PRESS && key == GLFW_KEY_ESCAPE){
         tryMakeWindowed(window);
-    }else if (action == GLFW_PRESS && key == GLFW_KEY_F12){
+    }else if (action == GLFW_PRESS && key == GLFW_KEY_F11){
         if (!tryMakeFullscreen(window)){
             tryMakeWindowed(window);
         }

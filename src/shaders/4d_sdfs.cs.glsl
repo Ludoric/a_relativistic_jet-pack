@@ -1,27 +1,26 @@
 #version 430
 layout(local_size_x = 1, local_size_y = 1) in;
 layout(rgba32f, binding = 0) restrict writeonly uniform image2D img;
-// layout(rgba32f, binding = 1) uniform image2D img_output;
 
-// layout(binding=0) uniform sampler2D img_input;
+uniform sampler2D lambda2RGB;
+
 uniform mat4 view;
 uniform mat4 B;  // Lorentz boost matrix from the camera's frame
 uniform vec2 imsize;
-uniform vec4 vel;
 // uniform float tau; // camera time 
 uniform float time; // world time
 
 float sdf(in vec3 pin){
     vec3 p = mod(pin+vec3(1.0), vec3(2.0))-vec3(1.0);
     // if (pin.x > 0.0){
-    // const vec2 torus_dim = vec2(0.5, 0.25);
-    // vec2 q = vec2(length(p.xz)-torus_dim.x,p.y);
-    // return length(q)-torus_dim.y;
+    const vec2 torus_dim = vec2(0.5, 0.25);
+    vec2 q = vec2(length(p.xz)-torus_dim.x,p.y);
+    return length(q)-torus_dim.y;
     // }
 
-    const vec3 b = vec3(0.5,0.5,0.5);
-    vec3 q = abs(p) - b;
-    return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+    // const vec3 b = vec3(0.5,0.5,0.5);
+    // vec3 q = abs(p) - b;
+    // return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
     
 }
 
@@ -57,15 +56,19 @@ void main() {
 
     // we will have to move the world, and keep the camera still
     // Work out how to calculate the correction new direction
-    vec4 kprime = B*vec4(rd, 1.0); // 1.0rad s-1 / c ???
+    vec4 kprime = B*vec4(normalize(rd), 1.0); // 1.0rad s-1 / c 
 
-    // shift the world to make it look like the rays are moving
+    // shift the world to make it look like the ray orgin is moving
     rd = normalize(kprime.xyz + B[3].xyz);
+    // rd = (kprime.xyz + B[3].xyz)*inversesqrt(1.0+B[3].w*B[3].w*c*c);
     
     // kprime.w will give the change in colour frequency.
     // Use a small 3d texture (generated in code?) to do the conversion from velocity shifted color to rgb
-    // CIE 1931 colour space
-    // GET YOUR COLOURS HERE!!! https://www.fourmilab.ch/documents/specrend/
+    // start with 550nm light (green)
+    vec3 c = texture(lambda2RGB, vec2(((550.0*kprime.w)-380.0)/(750.0-380.0), 0)).xyz;
+    // vec3 c = texture(lambda2RGB, vec2(((550.0*kprime.w)-256.666)/616.666, 0)).xyz;
+    // I/omega^3 = invarient
+    float intensity = 0.7/(kprime.w*kprime.w*kprime.w);
 
 
    // raymarch
@@ -88,18 +91,10 @@ void main() {
        vec3 nor = calcNormal(pos);
        float dif = clamp( dot(nor,vec3(0.7,0.6,0.4)), 0.0, 1.0 );
        float amb = 0.5 + 0.5*dot(nor,vec3(0.0,0.8,0.6));
-       col = vec3(0.2,0.3,0.4)*amb + vec3(0.8,0.7,0.5)*dif;
+       // col = vec3(0.2, 0.3, 0.4)*amb + vec3(0.8,0.7,0.5)*dif;  // vec3(0.2, 0.3, 0.4)
+       col = (c*amb + vec3(0.8,0.7,0.5)*dif)*intensity;
    } 
     
-    // col = t>=10 ? vec3(0.0) : vec3(1.0);
     imageStore(img, ivec2(pixel_coords), vec4(sqrt(col), 1.0));
 }
 
-
-
-
-// vec3 hsv2rgb(vec3 c){
-//     vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-//     vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-//     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-// }
