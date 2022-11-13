@@ -7,7 +7,7 @@ To reduce motion sickness the super-flux-quantum-thingummy™ jet-pack is equipp
 
 
 
-Alternatively, you float serenely though a rather curious universe where the speed of light has been lowered to 20ms-1, with an instantaneous rest frame acceleration of 2ms-2.
+Alternatively, you float serenely though a rather curious universe where the speed of light has been lowered to 32ms-1, with an instantaneous rest frame acceleration of 4ms-2.
 When not pressing a direction key, you decelerate at -2ms-2.
 The Green Doughnuts emit 550nm light (presumbably by diffuse scattering), which is doppler shifted in frequency and intensity. The lighting to show the shape of the doughnuts is entirely faked, based off a global illumination angle.
 

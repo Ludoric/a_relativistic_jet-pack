@@ -218,7 +218,9 @@ int main(){
     // glBindImageTexture( 0, tex_pattern[0], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F );
 
     
-    cam = Camera(glm::vec3(0.0f, -1.0f, 0.0f));
+    cam = Camera(glm::vec3(0.0f, +1.0f, 0.0f));
+    cam.MovementC = 32.0f;
+    cam.MovementAccelleration = 4.0f;
 
     double print_timecounter = glfwGetTime();
     double last_print_Time = print_timecounter;

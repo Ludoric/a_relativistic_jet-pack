@@ -25,7 +25,7 @@ enum Camera_Movement {
     WORLDDOWN
 };
 // maximum speed
-const float C = 20.0f; 
+const float C = 32.0f; 
 
 // Default camera values
 const float YAW           =  90.0f;

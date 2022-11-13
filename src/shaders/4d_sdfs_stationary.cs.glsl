@@ -150,17 +150,13 @@ void main() {
     vec3 ro = view[3].xyz;
     vec3 rd = mat3(view) * normalize(vec3(p, fl)); // mat3() will take the top lefthand corner
 
-    // change of coordinates!
-    // rd is in the camera frame. We want it in the world frame
-    // we lorentz boost each light ray from the camera (kprime)
+    // we will have to move the world, and keep the camera still
+    // Work out how to calculate the correction new direction
     vec4 kprime = B*vec4(rd, 1.0); // kprime^2 = 0
     
-    // and then have to shift the world to make it look like the ray orgin is moving
-    // B[3].xyz = -gamma*v/c, B[3].w = gamma
-    // rd = normalize(kprime.xyz + B[3].xyz);
-    rd = normalize(normalize(kprime.xyz) + B[3].xyz);
+    // shift the world to make it look like the ray orgin is moving
+    rd = normalize(kprime.xyz + B[3].xyz);
     // rd = (kprime.xyz + B[3].xyz)*inversesqrt(1.0+B[3].w*B[3].w*c*c);
-    // rd should now be in the world frame
     
 
     // we want the rays for the pixels one above and one two the left to a noise free grid
