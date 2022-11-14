@@ -28,7 +28,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 
 double mouse_y_prev = 0, mouse_x_prev = 0;
-GLuint imgWidth = 800, imgHeight = 800;
+GLuint imgWidth = 720, imgHeight = 1080;
 Camera cam;
 
 
@@ -204,6 +204,7 @@ int main(){
     // glActiveTexture(GL_TEXTURE1);
     // glBindTexture(GL_TEXTURE_2D, tex_lambda2RGB);
     glUniform1i(glGetUniformLocation(compute_program, "lambda2RGB"), 1);
+    GLuint Cloc = glGetUniformLocation(compute_program, "C");
     GLuint timeloc = glGetUniformLocation(compute_program, "time"); // the world's time
     // GLuint tauloc = glGetUniformLocation(compute_program, "tau"); // the camera's time
     GLuint viewloc = glGetUniformLocation(compute_program, "view");
@@ -220,7 +221,8 @@ int main(){
     
     cam = Camera(glm::vec3(0.0f, +1.0f, 0.0f));
     cam.MovementC = 32.0f;
-    cam.MovementAccelleration = 4.0f;
+    cam.MovementAccelleration = 6.0f;
+    cam.MovementDrag = 6.0f;
 
     double print_timecounter = glfwGetTime();
     double last_print_Time = print_timecounter;
@@ -253,6 +255,7 @@ int main(){
         glUseProgram(compute_program); // gl shader commands refer to the compute shader
         // glUniform1f(tauloc, float(currentTime)); 
         glUniform1f(timeloc, float(worldFrameTime)); 
+        glUniform1f(Cloc, cam.MovementC); 
         glUniform2f(imsizeloc, float(imgWidth), float(imgHeight)); 
         // glUniform4fv(velloc, 1, glm::value_ptr(glm::vec4(cam.Velocity, cam.MovementC))); // send matrix to shader
         glUniformMatrix4fv(viewloc, 1, GL_FALSE, glm::value_ptr(inverse_view)); // send matrix to shader

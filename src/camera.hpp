@@ -5,8 +5,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <iostream>
-#include <glm/gtx/string_cast.hpp>
+// #include <iostream>
+// #include <glm/gtx/string_cast.hpp>
 
 #include <vector>
 
@@ -25,14 +25,14 @@ enum Camera_Movement {
     WORLDDOWN
 };
 // maximum speed
-const float C = 32.0f; 
+const float C = 20.0f; 
 
 // Default camera values
 const float YAW           =  90.0f;
 const float PITCH         =   0.0f;
 // const float SPEED         =  2.5f;
-const float ACCELLERATION =   2.0f;
-const float DRAG          =   2.0f;
+const float ACCELLERATION =   4.0f;
+const float DRAG          =   4.0f;
 const float SENSITIVITY   =   0.1f;
 const float ZOOM          =  45.0f;
 
@@ -162,9 +162,15 @@ public:
             Direction = glm::vec3(0.0f, 0.0f, 0.0f);
         }
         else if (decelerate)
-        {   forceOm = -MovementDrag*Velocity;    }
+        {
+            if (glm::dot(Velocity, Velocity) >= 1.0)
+            {   forceOm = -MovementDrag*glm::normalize(Velocity);    }
+            else
+            {   forceOm = -MovementDrag*Velocity;    }
+        }
         else
         {    forceOm = glm::vec3(0.0f, 0.0f, 0.0f);   }
+
         decelerate = 1; // flag on wether or not to decellerate the player
         if (glm::dot(forceOm, forceOm) >= 0.0000001f)  // 0.0001f squared
         {

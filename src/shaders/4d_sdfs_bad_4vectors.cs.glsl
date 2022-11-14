@@ -10,7 +10,7 @@ uniform vec2 imsize;
 // uniform float tau; // camera time 
 uniform float time; // world time
 
-uniform float C;
+const float C = 32.0;
 
 
 vec2 union_ab( vec2 a, vec2 b ){
@@ -27,9 +27,8 @@ vec2 map4(in vec4 pin){
     vec2 torus = vec2(length(q)-torus_dim.y, 1.0);
     
     // 0.001*C ? 
-    // p.xz = vec2(mod(pin.x+0.5*c.x - 5.0, c.x)-0.5*c.x, mod(pin.z+0.5*c.y - 0.01*pin.w ,c.y)-0.5*c.y);
-    p.xz = vec2(mod(pin.x+0.5*c.x - 5.0, c.x)-0.5*c.x, mod(pin.z+0.5*c.y,c.y)-0.5*c.y);
-    vec3 qb = abs(p) - vec3(0.45);
+    p.xz = vec2(mod(pin.x+0.5*c.x - 5.0, c.x)-0.5*c.x, mod(pin.z+0.5*c.y - 0.001*pin.w ,c.y)-0.5*c.y);
+    vec3 qb = abs(p) - vec3(0.5);
     // first three is velocity
     vec2 boxes =  vec2(length(max(qb,0.0)) + min(max(qb.x,max(qb.y,qb.z)),0.0), 2.0);
 
@@ -60,12 +59,12 @@ vec2 raycast(in vec4 ro, in vec4 rd){
 
     // raytrace floor plane
     float tp1 = (0.0-ro.y)/rd.y;
-    if (tp1>0.0){
+    if (tp1<0.0){
         tmax = min(tmax, tp1);
         res = vec2(tp1, 0.0);
     }
 
-    if ((abs(ro.y) < 2.0) || (rd.y*ro.y<0.0)){
+    if ((abs(ro.y) < 2.0) || (rd.y*ro.y>0)){
         float t = tmin;
         for (int i=0; i<192 && t<tmax; i++){
             vec2 h = map4(ro + t*rd);
@@ -80,37 +79,37 @@ vec2 raycast(in vec4 ro, in vec4 rd){
 }
 
 
-// https://iquilezles.org/articles/normalsSDF
-// It's nothing very exciting; some well tuned values and tetrahedral sampling
-vec3 calcNormal(in vec4 pos ){
-    vec3 e = vec3(1.0,-1.0, 0.0)*0.5773;
-    const float eps = 0.0005;
-    return normalize(e.xyy*map4(pos + e.xyyz*eps).x + 
-					 e.yyx*map4(pos + e.yyxz*eps).x + 
-					 e.yxy*map4(pos + e.yxyz*eps).x + 
-					 e.xxx*map4(pos + e.xxxz*eps).x);
-}
-
-// vec4 calcNormal4(in vec4 p ){
-//     // // vec3 e = vec3((3.0*sqrt(5.0)-1.0)/8.0, (-sqrt(5.0)-1.0)/8.0, 1.0/2.0);
-//     // vec3 e = vec3(0.713525491562421, -0.404508497187474, 0.5);
-//     // const float eps = 0.0005;
-//     // vec4 v = (e.xyyy*map4(p + e.xyyy*eps).x +
-//     //           e.yxyy*map4(p + e.yxyy*eps).x +
-//     //           e.yyxy*map4(p + e.yyxy*eps).x +
-//     //           e.yyyx*map4(p + e.yyyx*eps).x +
-//     //           e.zzzz*map4(p + e.zzzz*eps).x);
-//     // const vec3 e = vec3(sqrt(5.0)/4.0, -sqrt(5.0)/4.0 , -1/4.0);
-//     const vec3 e = vec3(0.559016994374947, -0.559016994374947, -0.25);
-//     const vec4 f = vec4(0.0, 0.0, 0.0, 1.0);
+// // https://iquilezles.org/articles/normalsSDF
+// // It's nothing very exciting; some well tuned values and tetrahedral sampling
+// vec3 calcNormal(in vec3 pos ){
+//     vec2 e = vec2(1.0,-1.0)*0.5773;
 //     const float eps = 0.0005;
-//     vec4 v = (e.xxxz*map4(p + e.xxxz*eps).x +
-//               e.yyyz*map4(p + e.yyyz*eps).x +
-//               e.yxyz*map4(p + e.yxyz*eps).x +
-//               e.yyxz*map4(p + e.yyxz*eps).x +
-//               f*map4(p + f*eps).x);
-//     return normalize(v);  // v*inversesqrt(v.xyz);
+//     return normalize(e.xyy*map(pos + e.xyy*eps).x + 
+// 					 e.yyx*map(pos + e.yyx*eps).x + 
+// 					 e.yxy*map(pos + e.yxy*eps).x + 
+// 					 e.xxx*map(pos + e.xxx*eps).x);
 // }
+
+vec4 calcNormal4(in vec4 p ){
+    // // vec3 e = vec3((3.0*sqrt(5.0)-1.0)/8.0, (-sqrt(5.0)-1.0)/8.0, 1.0/2.0);
+    // vec3 e = vec3(0.713525491562421, -0.404508497187474, 0.5);
+    // const float eps = 0.0005;
+    // vec4 v = (e.xyyy*map4(p + e.xyyy*eps).x +
+    //           e.yxyy*map4(p + e.yxyy*eps).x +
+    //           e.yyxy*map4(p + e.yyxy*eps).x +
+    //           e.yyyx*map4(p + e.yyyx*eps).x +
+    //           e.zzzz*map4(p + e.zzzz*eps).x);
+    // const vec3 e = vec3(sqrt(5.0)/4.0, -sqrt(5.0)/4.0 , -1/4.0);
+    const vec3 e = vec3(0.559016994374947, -0.559016994374947, -0.25);
+    const vec4 f = vec4(0.0, 0.0, 0.0, 1.0);
+    const float eps = 0.0005;
+    vec4 v = (e.xxxz*map4(p + e.xxxz*eps).x +
+              e.yyyz*map4(p + e.yyyz*eps).x +
+              e.yxyz*map4(p + e.yxyz*eps).x +
+              e.yyxz*map4(p + e.yyxz*eps).x +
+              f*map4(p + f*eps).x);
+    return normalize(v);  // v*inversesqrt(v.xyz);
+}
 
 
 mat4 boost(in vec3 v){
@@ -143,7 +142,7 @@ vec3 render(in vec4 ro, in vec4 rd, in vec3 rdx, in vec3 rdy, in float wr){
     
     if (m > -0.5){
         vec4 pos = ro + t*rd;
-        vec3 nor = vec3(0.0, 1.0, 0.0); // plane normal
+        vec4 nor = vec4(0.0, 1.0, 0.0, 0.0); // plane normal
 
         if (m < 1.0){// it's on the plane
             // more magic from Inigo Quilez
@@ -155,21 +154,19 @@ vec3 render(in vec4 ro, in vec4 rd, in vec3 rdx, in vec3 rdy, in float wr){
             col = 0.15 + f*vec3(0.05);
             // ks = 0.4;
         }else{
-            nor = calcNormal(pos);
+            nor = calcNormal4(pos);
             // Use a small 3d texture (generated in code?) to do the conversion from velocity shifted color to rgb
             // start with 550nm light (green)
-            float c = 550.0; //(m == 1.0) ? 550.0 : 490.0;
-            if (m > 1.0){
-                c = 490.0;
-                // wr = (boost(vec3(0.0, 0.0, 0.1*C))*rd).w;
-            }
+            float c = (m == 1.0) ? 550.0 : 490.0;
+
+            wr = (boost(nor.xyz/nor.w)*rd).w;
             col = texture(lambda2RGB, vec2(((c*wr)-380.0)/(750.0-380.0), 0)).xyz;
             // vec3 c = texture(lambda2RGB, vec2(((550.0*kprime.w)-256.666)/616.666, 0)).xyz;
         }
 
         // shading/lighting	
-        float dif = clamp(dot(nor, vec3(0.7,0.6,0.4)), 0.0, 1.0);
-        float amb = 0.5 + 0.5*dot(nor, vec3(0.0,0.8,0.6));
+        float dif = clamp(dot(nor.xyz, vec3(0.7,0.6,0.4)), 0.0, 1.0);
+        float amb = 0.5 + 0.5*dot(nor.xyz, vec3(0.0,0.8,0.6));
         // col = vec3(0.2, 0.3, 0.4)*amb + vec3(0.8,0.7,0.5)*dif;  // vec3(0.2, 0.3, 0.4)
         
 
@@ -193,10 +190,10 @@ void main() {
     
     vec2 p = (-imsize.xy + 2.0*frag_coords)/imsize.y;
     
-    const float fl = -1.5;
+    const float fl = 1.5;
     // create view ray
     // vec3 rd = normalize( p.x*uu + p.y*vv + 1.5*ww );
-    vec4 ro = vec4(view[3].xyz, time);
+    vec4 ro = view[3];
     vec4 rd = vec4(mat3(view) * normalize(vec3(p, fl)), 1.0); // mat3() will take the top lefthand corner
     // the 1.0 should represent C, so we will have to measure time in units of Ct
 
@@ -208,7 +205,9 @@ void main() {
     
     // and then have to shift the world to make it look like the ray orgin is moving
     // B[3].xyz = -gamma*v/c, B[3].w = gamma
-    rd.xyz = normalize(kprime.xyz/kprime.w + B[3].xyz/B[3].w);
+    rd.xyz = normalize(kprime.xyz/kprime.w + B[3].xyz);
+    // rd = normalize(kprime + B[3]);
+    // rd = (kprime.xyz + B[3].xyz)*inversesqrt(1.0+B[3].w*B[3].w*c*c);
     // rd should now be in the world frame
     
 
@@ -219,8 +218,8 @@ void main() {
     vec3 rdy = mat3(view) * normalize(vec3(py,fl));
     vec4 krdx = B*vec4(rdx, 1.0);
     vec4 krdy = B*vec4(rdy, 1.0);
-    rdx =  normalize(krdx.xyz/krdx.w + B[3].xyz/B[3].w);
-    rdy =  normalize(krdy.xyz/krdy.w + B[3].xyz/B[3].w);
+    rdx =  normalize(krdx.xyz/krdx.w + B[3].xyz);
+    rdy =  normalize(krdy.xyz/krdy.w + B[3].xyz);
      
     vec3 col  = render(ro, rd, rdx, rdy, kprime.w);
    
