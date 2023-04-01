@@ -89,7 +89,7 @@ int main(){
     // generate the shaders
     // Compute Program
     GLuint compute_shader = create_shader(
-        (char const *)"./src/shaders/4d_sdfs.cs.glsl",
+        (char const *)"resources/4d_sdfs.cs.glsl",
         GL_COMPUTE_SHADER
     );
 
@@ -104,11 +104,11 @@ int main(){
 
     // Display Program
     GLuint vert_shader = create_shader(
-        (char const *)"src/shaders/vert_shader.vs.glsl", GL_VERTEX_SHADER
+        (char const *)"resources/vert_shader.vs.glsl", GL_VERTEX_SHADER
    );
 
     GLuint frag_shader = create_shader(
-        (char const *)"src/shaders/frag_shader.fs.glsl", GL_FRAGMENT_SHADER
+        (char const *)"resources/frag_shader.fs.glsl", GL_FRAGMENT_SHADER
    );
 
     GLuint display_program = glCreateProgram();
@@ -179,7 +179,7 @@ int main(){
 
         // create the inital texture!!!!
         int width, height, nrChannels;
-        unsigned char *data = stbi_load("src/lambda2RGB.png", &width, &height, &nrChannels, 0);
+        unsigned char *data = stbi_load("resources/lambda2RGB.png", &width, &height, &nrChannels, 0);
         if (data)
             glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         else

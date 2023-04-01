@@ -5,7 +5,7 @@ layout(rgba32f, binding = 0) restrict writeonly uniform image2D img;
 uniform sampler2D lambda2RGB;
 
 uniform mat4 view;
-uniform mat4 B;  // Lorentz boost matrix from the camera's frame
+uniform mat4 B;  // Lorentz boost matrix from the camera's frame (---+)
 uniform vec2 imsize;
 // uniform float tau; // camera time 
 uniform float time; // world time
