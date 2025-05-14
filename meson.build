@@ -27,7 +27,7 @@ executable('a_relativistic_jetpack', sources: src, include_directories : incdir,
 #     install_dir: join_paths('resources')
 # )
 
-copy = find_program('copy.py')
+copy = find_program('copyforinstall.py')
 
 run_command(copy, 'src'/'lambda2RGB.png', 'resources'/'lambda2RGB.png', check: true)
 run_command(copy, 'src'/'shaders'/'4d_sdfs.cs.glsl', 'resources'/'4d_sdfs.cs.glsl', check: true)

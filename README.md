@@ -36,11 +36,8 @@ This project was started after noting that the visual aids used in lectures on s
 Requires GLFW 3.3.6 (or greater) dynamically linked libraries (not included), and a graphics device that supports OpenGL 4.3 or higher. (This will include most graphics cards made after 2017).
 GLFW3 is available from your favourite Linux package manager, and Windows and macOS binaries are available from the [GLFW website](https://www.glfw.org/download.html).
 
-Compilation can be performed the following, or an equivalent command, from the root directory
-
-    g++ -I./include src/4d_sdf.cpp src/shader_utils.cpp src/glad.c -lglfw -O3 -o 4d_sdf
-
-The code currently assumes that the shader files are found in ./src/shaders/ relative to the execution directory, so moving the executable is not recommended.
+Compilation is best performed using meson, with `meson setup builddir && cd builddir && meson compile` or similar.
+Compilation can be performed with directly with gcc, but this will require moving the location of the resource files manually, and is not recommended. `g++ -I./include src/4d_sdf.cpp src/shader_utils.cpp src/glad.c -lglfw -O3 -o 4d_sdf`
 
 
 ## Licence 
